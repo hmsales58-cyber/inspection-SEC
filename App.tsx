@@ -1,34 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
-  Camera, Trash2, Loader2, Share2, Download, PackageCheck, 
-  ShieldAlert, Smartphone, Power, SmartphoneNfc, TriangleAlert, 
+  Camera, Trash2, Loader2, AlertCircle, Share2, Download, PackageCheck, 
+  ShieldAlert, Smartphone, Power, SmartphoneNfc, AlertTriangle, 
   PackageOpen, Sticker, Sparkles, Package, FolderOpen, Archive, CheckCircle2 
 } from 'lucide-react';
-import { DEFAULT_HEADER, DEFAULT_CHECKLIST, CHECKLIST_ITEMS } from './types';
+import { DEFAULT_HEADER, DEFAULT_CHECKLIST } from './types';
 import { PrintLayout } from './components/PrintLayout';
 
 export default function App() {
   const [header, setHeader] = useState(DEFAULT_HEADER);
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<any[]>([]);
   const [checklist, setChecklist] = useState(DEFAULT_CHECKLIST);
   const [loading, setLoading] = useState(false);
 
-  // وظيفة إضافة عنصر جديد
   const addItem = () => {
-    const newItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      model: '',
-      gb: '',
-      pcs: 1,
-      color: '',
-      coo: '',
-      spec: '',
-      remarks: ''
-    };
-    setItems([...items, newItem]);
+    setItems([...items, { id: Math.random().toString(), model: '', gb: '', pcs: 1, color: '', spec: '' }]);
   };
 
-  // وظيفة الحفظ (تأكد من وضع الرابط الخاص بك هنا)
   const handleSave = async () => {
     setLoading(true);
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtcbUEImJngHWkKp-yPzkTBG6IIFVAmNPgEgLGKYy2q25cioP2GWAUvkX7x4yD6p6ZA/exec";
@@ -40,7 +28,7 @@ export default function App() {
       });
       alert("✅ Data Sent Successfully!");
     } catch (e) {
-      alert("❌ Error Sending Data");
+      alert("❌ Error");
     }
     setLoading(false);
   };
@@ -58,28 +46,18 @@ export default function App() {
         {/* HEADER FORM */}
         <div className="bg-white p-6 rounded-[35px] shadow-sm border border-slate-100">
           <input 
-            className="w-full text-2xl font-black mb-4 outline-none placeholder:text-slate-200" 
+            className="w-full text-2xl font-black mb-4 outline-none" 
             placeholder="COMPANY NAME"
             value={header.companyName}
             onChange={e => setHeader({...header, companyName: e.target.value})}
           />
           <div className="grid grid-cols-2 gap-4">
-            <input 
-              className="bg-slate-100 p-4 rounded-2xl font-bold" 
-              placeholder="CUSTOMER CODE"
-              value={header.customerCode}
-              onChange={e => setHeader({...header, customerCode: e.target.value})}
-            />
-            <input 
-              className="bg-slate-100 p-4 rounded-2xl font-bold text-center" 
-              type="time"
-              value={header.startTime}
-              onChange={e => setHeader({...header, startTime: e.target.value})}
-            />
+            <input className="bg-slate-100 p-4 rounded-2xl font-bold" placeholder="CUSTOMER CODE" value={header.customerCode} onChange={e => setHeader({...header, customerCode: e.target.value})}/>
+            <input className="bg-slate-100 p-4 rounded-2xl font-bold text-center" type="time" value={header.startTime} onChange={e => setHeader({...header, startTime: e.target.value})}/>
           </div>
         </div>
 
-        {/* ITEMS LIST */}
+        {/* ITEMS */}
         <div className="space-y-4">
           <div className="flex justify-between items-center px-2">
             <h2 className="text-xl font-black text-slate-800">INSPECTION ITEMS</h2>
@@ -88,22 +66,8 @@ export default function App() {
           
           {items.map((item, index) => (
             <div key={item.id} className="bg-white p-6 rounded-[30px] border-2 border-slate-100 shadow-sm relative">
-              <button 
-                onClick={() => setItems(items.filter(i => i.id !== item.id))}
-                className="absolute top-4 right-4 text-rose-500"
-              >
-                <Trash2 size={20} />
-              </button>
-              <input 
-                className="w-full text-lg font-bold mb-3 outline-none" 
-                placeholder="Model Name (e.g. iPhone 16 Pro Max)"
-                value={item.model}
-                onChange={e => {
-                  const newItems = [...items];
-                  newItems[index].model = e.target.value;
-                  setItems(newItems);
-                }}
-              />
+              <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="absolute top-4 right-4 text-rose-500"><Trash2 size={20} /></button>
+              <input className="w-full text-lg font-bold mb-3 outline-none" placeholder="Model Name" value={item.model} onChange={e => {const n=[...items]; n[index].model=e.target.value; setItems(n);}}/>
               <div className="grid grid-cols-3 gap-3">
                 <input className="bg-slate-50 p-3 rounded-xl text-sm font-bold" placeholder="GB" value={item.gb} onChange={e => {const n=[...items]; n[index].gb=e.target.value; setItems(n);}}/>
                 <input className="bg-slate-50 p-3 rounded-xl text-sm font-bold" placeholder="Color" value={item.color} onChange={e => {const n=[...items]; n[index].color=e.target.value; setItems(n);}}/>
@@ -113,11 +77,11 @@ export default function App() {
           ))}
         </div>
 
-        {/* SAVE BUTTON */}
+        {/* SAVE */}
         <button 
           onClick={handleSave}
           disabled={loading}
-          className="w-full bg-emerald-500 text-white py-6 rounded-[30px] font-black text-xl shadow-xl flex justify-center items-center gap-4 active:scale-95 transition-transform"
+          className="w-full bg-emerald-500 text-white py-6 rounded-[30px] font-black text-xl shadow-xl flex justify-center items-center gap-4 active:scale-95"
         >
           {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={28} />}
           SAVE TO GOOGLE DRIVE
