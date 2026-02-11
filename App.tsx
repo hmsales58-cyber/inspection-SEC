@@ -1,111 +1,130 @@
-import streamlit as st
-import requests
-import json
-from datetime import datetime
+import React, { useState, useRef } from 'react';
+import { 
+  Camera, Trash2, Loader2, Share2, Download, PackageCheck, 
+  ShieldAlert, Smartphone, Power, SmartphoneNfc, TriangleAlert, 
+  PackageOpen, Sticker, Sparkles, Package, FolderOpen, Archive, CheckCircle2 
+} from 'lucide-react';
+import { DEFAULT_HEADER, DEFAULT_CHECKLIST, CHECKLIST_ITEMS } from './types';
+import { PrintLayout } from './components/PrintLayout';
 
-# إعدادات الصفحة
-st.set_page_config(page_title="SECURED Inspection", page_icon="🛡️", layout="centered")
+export default function App() {
+  const [header, setHeader] = useState(DEFAULT_HEADER);
+  const [items, setItems] = useState([]);
+  const [checklist, setChecklist] = useState(DEFAULT_CHECKLIST);
+  const [loading, setLoading] = useState(false);
 
-# تأمين الـ Session State (حل مشكلة الـ TypeError)
-if 'items' not in st.session_state:
-    st.session_state.items = [{"model": "", "gb": "", "pcs": 1, "color": "", "spec": ""}]
+  // وظيفة إضافة عنصر جديد
+  const addItem = () => {
+    const newItem = {
+      id: Math.random().toString(36).substr(2, 9),
+      model: '',
+      gb: '',
+      pcs: 1,
+      color: '',
+      coo: '',
+      spec: '',
+      remarks: ''
+    };
+    setItems([...items, newItem]);
+  };
 
-if 'checklist' not in st.session_state:
-    checklist_keys = [
-        'PACK ORIGINAL', 'BOX OUT SIDE DAMAGE', 'OUT SIDE DAMAGE', 
-        'PACK OPEN', 'DAMAGE PCS', 'ACTIVE PCS', 
-        'UNCLEAN / STICKER BOX', 'LOOSE BOX', 'OPEN MASTER', 'MASTER', 'STICKERS PCS'
-    ]
-    st.session_state.checklist = {key: {"checked": False, "count": 0} for key in checklist_keys}
-
-# --- [ التنسيق الاحترافي - الألوان السوداء ] ---
-st.markdown("""
-    <style>
-    .stApp { background-color: #f8f9fa; }
-    .brand-header {
-        background-color: #000; color: white; padding: 40px;
-        border-radius: 40px; text-align: center; margin-bottom: 30px;
+  // وظيفة الحفظ (تأكد من وضع الرابط الخاص بك هنا)
+  const handleSave = async () => {
+    setLoading(true);
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtcbUEImJngHWkKp-yPzkTBG6IIFVAmNPgEgLGKYy2q25cioP2GWAUvkX7x4yD6p6ZA/exec";
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ header, items, checklist })
+      });
+      alert("✅ Data Sent Successfully!");
+    } catch (e) {
+      alert("❌ Error Sending Data");
     }
-    .data-card {
-        background: white; padding: 25px; border-radius: 30px;
-        border: 1px solid #eee; margin-bottom: 20px;
-    }
-    .stButton>button {
-        width: 100%; border-radius: 20px; height: 4.5em;
-        font-weight: 900; background-color: #000; color: white;
-    }
-    div[data-testid="stVerticalBlock"] > div:last-child .stButton>button {
-        background-color: #10b981 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    setLoading(false);
+  };
 
-# --- [ الهيدر ] ---
-st.markdown("""
-    <div class="brand-header">
-        <div style="font-size: 32px; font-weight: 900; letter-spacing: 4px;">SECURED</div>
-        <div style="font-size: 10px; letter-spacing: 6px; opacity: 0.6;">LOGISTICS SOLUTION FZCO</div>
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 pb-24 font-sans">
+      <div className="max-w-xl mx-auto space-y-6">
+        
+        {/* BRANDING */}
+        <div className="bg-black text-white p-10 rounded-[45px] text-center shadow-2xl">
+          <h1 className="text-4xl font-black tracking-widest">SECURED</h1>
+          <p className="text-[10px] tracking-[0.5em] opacity-50 uppercase mt-2">Logistics Solution FZCO</p>
+        </div>
+
+        {/* HEADER FORM */}
+        <div className="bg-white p-6 rounded-[35px] shadow-sm border border-slate-100">
+          <input 
+            className="w-full text-2xl font-black mb-4 outline-none placeholder:text-slate-200" 
+            placeholder="COMPANY NAME"
+            value={header.companyName}
+            onChange={e => setHeader({...header, companyName: e.target.value})}
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <input 
+              className="bg-slate-100 p-4 rounded-2xl font-bold" 
+              placeholder="CUSTOMER CODE"
+              value={header.customerCode}
+              onChange={e => setHeader({...header, customerCode: e.target.value})}
+            />
+            <input 
+              className="bg-slate-100 p-4 rounded-2xl font-bold text-center" 
+              type="time"
+              value={header.startTime}
+              onChange={e => setHeader({...header, startTime: e.target.value})}
+            />
+          </div>
+        </div>
+
+        {/* ITEMS LIST */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center px-2">
+            <h2 className="text-xl font-black text-slate-800">INSPECTION ITEMS</h2>
+            <button onClick={addItem} className="bg-black text-white px-6 py-2 rounded-full font-bold text-sm">+ ADD</button>
+          </div>
+          
+          {items.map((item, index) => (
+            <div key={item.id} className="bg-white p-6 rounded-[30px] border-2 border-slate-100 shadow-sm relative">
+              <button 
+                onClick={() => setItems(items.filter(i => i.id !== item.id))}
+                className="absolute top-4 right-4 text-rose-500"
+              >
+                <Trash2 size={20} />
+              </button>
+              <input 
+                className="w-full text-lg font-bold mb-3 outline-none" 
+                placeholder="Model Name (e.g. iPhone 16 Pro Max)"
+                value={item.model}
+                onChange={e => {
+                  const newItems = [...items];
+                  newItems[index].model = e.target.value;
+                  setItems(newItems);
+                }}
+              />
+              <div className="grid grid-cols-3 gap-3">
+                <input className="bg-slate-50 p-3 rounded-xl text-sm font-bold" placeholder="GB" value={item.gb} onChange={e => {const n=[...items]; n[index].gb=e.target.value; setItems(n);}}/>
+                <input className="bg-slate-50 p-3 rounded-xl text-sm font-bold" placeholder="Color" value={item.color} onChange={e => {const n=[...items]; n[index].color=e.target.value; setItems(n);}}/>
+                <input className="bg-slate-50 p-3 rounded-xl text-sm font-bold text-center" type="number" value={item.pcs} onChange={e => {const n=[...items]; n[index].pcs=parseInt(e.target.value); setItems(n);}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* SAVE BUTTON */}
+        <button 
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full bg-emerald-500 text-white py-6 rounded-[30px] font-black text-xl shadow-xl flex justify-center items-center gap-4 active:scale-95 transition-transform"
+        >
+          {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={28} />}
+          SAVE TO GOOGLE DRIVE
+        </button>
+
+      </div>
+      <PrintLayout header={header} items={items} checklist={checklist} />
     </div>
-    """, unsafe_allow_html=True)
-
-# --- [ 1. Header المعلومات ] ---
-st.markdown('<div class="data-card">', unsafe_allow_html=True)
-c1, c2 = st.columns(2)
-with c1:
-    customer_code = st.text_input("CUSTOMER CODE", value="C-000")
-    start_time = st.text_input("START TIME", value=datetime.now().strftime("%H:%M"))
-with c2:
-    company_name = st.text_input("COMPANY NAME", placeholder="Client Name")
-    checked_by = st.text_input("AUDITOR", value="Hussein Badawi")
-st.markdown('</div>', unsafe_allow_html=True)
-
-# --- [ 2. الـ Items (الجزء اللي كان فيه الخطأ) ] ---
-st.markdown("### 📦 INVENTORY LIST")
-# عرض العناصر الموجودة في الـ session_state بأمان
-for i in range(len(st.session_state.items)):
-    st.markdown(f'<div class="data-card">', unsafe_allow_html=True)
-    st.markdown(f"**ITEM #{i+1}**")
-    st.session_state.items[i]['model'] = st.text_input(f"Model", key=f"m_{i}", value=st.session_state.items[i]['model'])
-    
-    col_a, col_b, col_c = st.columns([1, 1, 1])
-    st.session_state.items[i]['gb'] = col_a.text_input("GB", key=f"g_{i}", value=st.session_state.items[i]['gb'])
-    st.session_state.items[i]['color'] = col_b.text_input("Color", key=f"c_{i}", value=st.session_state.items[i]['color'])
-    st.session_state.items[i]['pcs'] = col_c.number_input("Qty", min_value=1, key=f"q_{i}", value=st.session_state.items[i]['pcs'])
-    st.markdown('</div>', unsafe_allow_html=True)
-
-if st.button("➕ ADD NEW DEVICE"):
-    st.session_state.items.append({"model": "", "gb": "", "pcs": 1, "color": "", "spec": ""})
-    st.rerun()
-
-# --- [ 3. Checklist ] ---
-st.markdown("### ✅ CONDITION VERIFICATION")
-st.markdown('<div class="data-card">', unsafe_allow_html=True)
-for key in st.session_state.checklist.keys():
-    col_check, col_count = st.columns([2, 1])
-    with col_check:
-        is_checked = st.checkbox(key, key=f"chk_ui_{key}", value=st.session_state.checklist[key]['checked'])
-        st.session_state.checklist[key]['checked'] = is_checked
-    with col_count:
-        if is_checked:
-            count = st.number_input("Qty", min_value=0, key=f"num_ui_{key}", value=st.session_state.checklist[key]['count'], label_visibility="collapsed")
-            st.session_state.checklist[key]['count'] = count
-st.markdown('</div>', unsafe_allow_html=True)
-
-# --- [ 4. SAVE ] ---
-total_qty = sum(it['pcs'] for it in st.session_state.items)
-st.markdown(f"<h2 style='text-align: center;'>Total: {total_qty}</h2>", unsafe_allow_html=True)
-
-if st.button("🚀 SAVE TO GOOGLE DRIVE"):
-    SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtcbUEImJngHWkKp-yPzkTBG6IIFVAmNPgEgLGKYy2q25cioP2GWAUvkX7x4yD6p6ZA/exec"
-    payload = {
-        "header": {"companyName": company_name, "customerCode": customer_code, "startTime": start_time, "checkedBy": checked_by, "date": datetime.now().strftime("%Y-%m-%d")},
-        "items": st.session_state.items,
-        "checklist": st.session_state.checklist,
-        "totalQty": total_qty
-    }
-    try:
-        requests.post(SCRIPT_URL, json=payload, timeout=15)
-        st.success("🏁 DONE!")
-        st.balloons()
-    except:
-        st.error("Connection Error")
+  );
+}
