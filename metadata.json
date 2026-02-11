@@ -1,0 +1,7 @@
+{
+  "name": "Secured Inspection Automator",
+  "description": "AI-powered data entry and report generation for Secured Inspection Reports.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
